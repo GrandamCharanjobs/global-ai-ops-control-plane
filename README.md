@@ -57,6 +57,9 @@ Built in 2hrs → Staff SRE platform quality → Ready for FAANG interviews 🚀
 <img width="1470" height="956" alt="Screenshot 2026-03-02 at 10 37 33 AM" src="https://github.com/user-attachments/assets/2abb93cf-1b51-476a-8ea8-bd64cb0e249b" />
 <img width="1470" height="956" alt="Screenshot 2026-03-02 at 10 42 19 AM" src="https://github.com/user-attachments/assets/33f6e1b6-c9d7-4163-9a8e-af42d670f64d" />
 
+<img width="1470" height="956" alt="Screenshot 2026-03-02 at 11 30 24 AM" src="https://github.com/user-attachments/assets/62a26730-6f8f-4a14-8d1a-851bd7a3ba0d" />
+
+<img width="1470" height="956" alt="Screenshot 2026-03-02 at 11 31 04 AM" src="https://github.com/user-attachments/assets/37a23659-441f-4177-84f4-19bc55b5efc1" />
 
 
 
