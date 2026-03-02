@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Global AI Ops Control Plane</title>
+    <style>
+        body {
+            background-color: #0b0c10;
+            color: #c5c6c7;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background-color: #1f2833;
+            padding: 16px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #45a29e;
+        }
+        header h1 {
+            margin: 0;
+            font-size: 20px;
+            color: #66fcf1;
+        }
+        header span {
+            font-size: 12px;
+            color: #c5c6c7;
+        }
+        main {
+            padding: 24px 32px;
+        }
+        .summary {
+            margin-bottom: 24px;
+            display: flex;
+            gap: 24px;
+        }
+        .summary-card {
+            background-color: #1f2833;
+            padding: 16px;
+            border-radius: 8px;
+            min-width: 180px;
+            border: 1px solid #45a29e22;
+        }
+        .summary-card h2 {
+            margin: 0 0 8px 0;
+            font-size: 14px;
+            color: #c5c6c7;
+        }
+        .summary-card p {
+            margin: 0;
+            font-size: 20px;
+            color: #66fcf1;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #1f2833;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        thead {
+            background-color: #171b22;
+        }
+        th, td {
+            padding: 10px 12px;
+            font-size: 13px;
+        }
+        th {
+            text-align: left;
+            color: #c5c6c7;
+            border-bottom: 1px solid #45a29e44;
+        }
+        tr:nth-child(even) {
+            background-color: #1a2029;
+        }
+        tr:nth-child(odd) {
+            background-color: #1f2833;
+        }
+        .sev1 { color: #ff6b6b; font-weight: 600; }
+        .sev2 { color: #f6b26b; font-weight: 600; }
+        .sev3, .info { color: #9ad983; }
+        .pill {
+            border-radius: 999px;
+            padding: 2px 8px;
+            font-size: 11px;
+            border: 1px solid #45a29e55;
+            display: inline-block;
+        }
+        .ai-summary {
+            font-size: 12px;
+            color: #c5c6c7;
+        }
+        .ai-actions {
+            font-size: 11px;
+            color: #9caec1;
+        }
+        .tag {
+            font-size: 11px;
+            color: #66fcf1;
+        }
+    </style>
+</head>
+<body>
+<header>
+    <h1>Global AI Ops Control Plane</h1>
+    <span>Incidents: {{ incidents|length }} &nbsp;|&nbsp; Version {{ version }}</span>
+</header>
+<main>
+    <section class="summary">
+        <div class="summary-card">
+            <h2>Total Incidents</h2>
+            <p>{{ incidents|length }}</p>
+        </div>
+        <div class="summary-card">
+            <h2>SEV1</h2>
+            <p>{{ sev1_count }}</p>
+        </div>
+        <div class="summary-card">
+            <h2>SEV2</h2>
+            <p>{{ sev2_count }}</p>
+        </div>
+    </section>
+
+    <section>
+        <table>
+            <thead>
+                <tr>
+                    <th>Time (UTC)</th>
+                    <th>Severity</th>
+                    <th>Service</th>
+                    <th>Source</th>
+                    <th>Region</th>
+                    <th>AI Summary / Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for inc in incidents %}
+                <tr>
+                    <td>{{ inc.received_at }}</td>
+                    <td>
+                        {% set sev = inc.severity.upper() %}
+                        <span class="sev1"   {% if sev == "SEV1" %}class="sev1"{% endif %}>
+                        </span>
+                        {% if sev == "SEV1" %}
+                            <span class="sev1">{{ sev }}</span>
+                        {% elif sev == "SEV2" %}
+                            <span class="sev2">{{ sev }}</span>
+                        {% else %}
+                            <span class="info">{{ sev }}</span>
+                        {% endif %}
+                    </td>
+                    <td><span class="pill">{{ inc.service }}</span></td>
+                    <td><span class="tag">{{ inc.source }}</span></td>
+                    <td>{{ inc.region or "-" }}</td>
+                    <td>
+                        <div class="ai-summary">
+                            {{ inc.ai_summary or "AI summary not available" }}
+                        </div>
+                        {% if inc.ai_recommended_actions %}
+                        <div class="ai-actions">
+                            {{ inc.ai_recommended_actions | join(" • ") }}
+                        </div>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </section>
+</main>
+</body>
+</html>

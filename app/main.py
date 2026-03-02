@@ -1,25 +1,30 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 from typing import List, Optional
 from datetime import datetime
 from uuid import uuid4
+import os
 
 app = FastAPI(
     title="Global AI Ops Control Plane",
-    version="0.2.0",
+    version="0.3.0",
     description="Central control plane for multi-cloud SRE, cost, and security incidents.",
 )
+
+templates = Jinja2Templates(directory=os.path.join(os.path.dirname(__file__), "templates"))
 
 # ----- Models -----
 
 class IncidentIn(BaseModel):
-    source: str              # e.g. "aws-cloudwatch", "k8s-prometheus", "github-actions"
-    service: str             # e.g. "payments-api", "eks-cluster-1"
-    severity: str            # e.g. "SEV1", "SEV2", "INFO"
-    title: str               # short description
-    details: str             # longer message / raw alert
-    region: Optional[str] = None      # optional, e.g. "us-east-1"
-    created_at: Optional[datetime] = None  # client timestamp (optional)
+    source: str
+    service: str
+    severity: str
+    title: str
+    details: str
+    region: Optional[str] = None
+    created_at: Optional[datetime] = None
 
 class IncidentOut(IncidentIn):
     id: str
@@ -47,7 +52,7 @@ def generate_ai_recommendations(incident: IncidentIn) -> List[str]:
         recs.append("Scale service replicas and verify downstream dependencies.")
     return recs
 
-# ----- Endpoints -----
+# ----- API Endpoints -----
 
 @app.get("/")
 def read_root():
@@ -59,7 +64,6 @@ def health_check():
 
 @app.post("/ingest/incident", response_model=IncidentOut)
 def ingest_incident(incident: IncidentIn):
-    """Ingest a single incident/alert from any source."""
     ai_summary = generate_ai_summary(incident)
     ai_recs = generate_ai_recommendations(incident)
 
@@ -75,5 +79,23 @@ def ingest_incident(incident: IncidentIn):
 
 @app.get("/incidents", response_model=List[IncidentOut])
 def list_incidents():
-    """List all incidents ingested so far."""
     return INCIDENTS
+
+# ----- HTML Dashboard -----
+
+@app.get("/dashboard", response_class=HTMLResponse)
+def dashboard(request: Request):
+    incidents = list(reversed(INCIDENTS))  # newest first
+    sev1_count = sum(1 for i in incidents if i.severity.upper() == "SEV1")
+    sev2_count = sum(1 for i in incidents if i.severity.upper() == "SEV2")
+
+    return templates.TemplateResponse(
+        "dashboard.html",
+        {
+            "request": request,
+            "incidents": incidents,
+            "sev1_count": sev1_count,
+            "sev2_count": sev2_count,
+            "version": app.version,
+        },
+    )
